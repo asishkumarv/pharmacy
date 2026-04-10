@@ -6,7 +6,7 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: "*"
+  origin: "https://pharmacyerp-6224a.web.app"
 }));
 
 const cache = new NodeCache({ stdTTL: 3600 }); // 1 hour cache
