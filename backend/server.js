@@ -6,13 +6,17 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: "https://pharmacyerp-6224a.web.app"
+  origin: [
+    "http://localhost:3000",
+    "https://pharmacyerp-6224a.web.app"
+  ]
 }));
+
 
 const cache = new NodeCache({ stdTTL: 3600 }); // 1 hour cache
 
 // 🔥 Replace with actual API URL
-const API_URL = "https://your-api-url.com/generate-token";
+const API_URL = "http://117.211.64.158:41000/ws_c2_services_generate_token";
 
 app.post("/api/generate-token", async (req, res) => {
   const payload = req.body;
@@ -30,7 +34,14 @@ app.post("/api/generate-token", async (req, res) => {
       request: payload,
       apiKey: data.apiKey,
     });
+ // ✅ Confirm saved
+    console.log("💾 Saved in Cache with key:", cacheKey);
 
+    // 🔍 Immediately verify cache
+    const cachedData = cache.get(cacheKey);
+    console.log("🧠 Cache Value:", cachedData);
+
+    console.log("=====================================");
     res.json(data);
   } catch (error) {
     console.error(error.message);
@@ -162,26 +173,29 @@ app.post("/api/create-order", async (req, res) => {
 });
 app.get("/api/order-status", async (req, res) => {
   try {
-    const { order_no, c2Code, storeId, prodCode } = req.query;
+    console.log("=====================================");
+    console.log("📌 Incoming Query:", req.query);
 
-    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
-    const cached = cache.get(cacheKey);
+    const { order_no, apikey } = req.query;
 
-    if (!cached) {
+    if (!apikey) {
       return res.status(400).json({
-        error: "API key not found. Generate token first.",
+        error: "API key is required",
       });
     }
 
-    const apiKey = cached.apiKey;
+    const url = `http://117.211.64.158:41000/ws_c2_services_sale_order_status?order_no=${order_no}&apikey=${apikey}`;
 
-    const response = await axios.get(
-      `http://localhost:45000/ws_c2_services_sale_order_status?order_no=${order_no}&apikey=${apiKey}`
-    );
+    console.log("🌐 Calling External API:", url);
+
+    const response = await axios.get(url);
+
+    console.log("📥 External API Response:", response.data);
+    console.log("=====================================");
 
     res.json(response.data);
   } catch (err) {
-    console.error(err.message);
+    console.error("❌ Error:", err.response?.data || err.message);
     res.status(500).json({ error: "Order Status API failed" });
   }
 });

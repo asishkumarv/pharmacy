@@ -19,12 +19,12 @@ const OrderStatus = () => {
   const [orderNo, setOrderNo] = useState("");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-
+const [apiKey, setApiKey] = useState("");
   const handleSearch = async () => {
-    if (!orderNo) {
-      alert("Enter Order Number");
-      return;
-    }
+  if (!orderNo || !apiKey) {
+  alert("Enter Order Number and API Key");
+  return;
+}
 
     
 
@@ -32,9 +32,9 @@ const OrderStatus = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        `http://localhost:5000/api/order-status?order_no=${orderNo}`
-      );
+const res = await axios.get(
+  `http://localhost:5000/api/order-status?order_no=${orderNo}&apikey=${apiKey}`
+);
 
       setData(res.data);
     } catch (err) {
@@ -63,7 +63,12 @@ const OrderStatus = () => {
               value={orderNo}
               onChange={(e) => setOrderNo(e.target.value)}
             />
-
+<TextField
+  label="API Key"
+  value={apiKey}
+  onChange={(e) => setApiKey(e.target.value)}
+  fullWidth
+/>
             <Button
               variant="contained"
               onClick={handleSearch}
