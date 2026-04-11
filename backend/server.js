@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const NodeCache = require("node-cache");
 const cors = require("cors");
-
+const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
 app.use(cors({
@@ -116,4 +116,6 @@ app.get("/api/cache/:key", (req, res) => {
   res.json(data);
 });
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
