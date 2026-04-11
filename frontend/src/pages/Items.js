@@ -35,7 +35,7 @@ const Items = () => {
         storeId: "001",
         prodCode: "02",
         itemCodes: itemCode.split(",").map((i) => i.trim()),
-        apiKey: "YOUR_API_KEY_HERE", // replace dynamically later
+       
       };
 
       const res = await axios.post(

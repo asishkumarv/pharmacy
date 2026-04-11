@@ -35,7 +35,7 @@ const Stock = () => {
         storeId: "001",
         prodCode: "02",
         inputDateTime: `${date} ${time}`,
-        apiKey: "MDNCMDAwMDAxXjIwMjYtMDItMTIgMTE6NTI=",
+        
       };
 
       const res = await axios.post(

@@ -34,7 +34,7 @@ const PurchaseOrder = () => {
         c2Code: "03B000",
         storeId: "001",
         prodCode: "02",
-        apiKey: "MDNCMDAwMDAxXjIwMjYtMDItMTIgMTE6NTI=",
+       
         fromDate,
         toDate,
       };

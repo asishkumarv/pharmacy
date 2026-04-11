@@ -40,9 +40,26 @@ app.post("/api/generate-token", async (req, res) => {
 
 app.post("/api/items", async (req, res) => {
   try {
+    const { c2Code, storeId, prodCode } = req.body;
+
+    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
+    const cached = cache.get(cacheKey);
+
+    if (!cached) {
+      return res.status(400).json({
+        error: "API key not found. Generate token first.",
+      });
+    }
+
+    // 🔥 Inject API KEY from cache
+    const payload = {
+      ...req.body,
+      apiKey: cached.apiKey,
+    };
+
     const response = await axios.post(
       "YOUR_REAL_API_URL_HERE",
-      req.body
+      payload
     );
 
     res.json(response.data);
@@ -54,9 +71,26 @@ app.post("/api/items", async (req, res) => {
 
 app.post("/api/stock", async (req, res) => {
   try {
+    const { c2Code, storeId, prodCode } = req.body;
+
+    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
+    const cached = cache.get(cacheKey);
+
+    if (!cached) {
+      return res.status(400).json({
+        error: "API key not found. Generate token first.",
+      });
+    }
+
+    // 🔥 Inject API KEY from cache
+    const payload = {
+      ...req.body,
+      apiKey: cached.apiKey,
+    };
+
     const response = await axios.post(
-      "https://your-real-api-url.com/stock", // replace
-      req.body
+      "https://your-real-api-url.com/stock",
+      payload
     );
 
     res.json(response.data);
@@ -68,9 +102,26 @@ app.post("/api/stock", async (req, res) => {
 
 app.post("/api/purchase-order", async (req, res) => {
   try {
+    const { c2Code, storeId, prodCode } = req.body;
+
+    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
+    const cached = cache.get(cacheKey);
+
+    if (!cached) {
+      return res.status(400).json({
+        error: "API key not found. Generate token first.",
+      });
+    }
+
+    // 🔥 Inject API KEY
+    const payload = {
+      ...req.body,
+      apiKey: cached.apiKey,
+    };
+
     const response = await axios.post(
       "https://your-api-url.com/purchase-order",
-      req.body
+      payload
     );
 
     res.json(response.data);
@@ -81,28 +132,88 @@ app.post("/api/purchase-order", async (req, res) => {
 });
 app.post("/api/create-order", async (req, res) => {
   try {
+    const { c2Code, storeId, prodCode } = req.body;
+
+    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
+    const cached = cache.get(cacheKey);
+
+    if (!cached) {
+      return res.status(400).json({
+        error: "API key not found. Generate token first.",
+      });
+    }
+
+    // 🔥 Inject API KEY automatically
+    const payload = {
+      ...req.body,
+      apiKey: cached.apiKey,
+    };
+
     const response = await axios.post(
       "https://your-api-url.com/create-order",
-      req.body
+      payload
     );
 
     res.json(response.data);
   } catch (err) {
+    console.error(err.message);
     res.status(500).json({ error: "Create Order Failed" });
   }
 });
 app.get("/api/order-status", async (req, res) => {
   try {
-    const { order_no, apikey } = req.query;
+    const { order_no, c2Code, storeId, prodCode } = req.query;
+
+    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
+    const cached = cache.get(cacheKey);
+
+    if (!cached) {
+      return res.status(400).json({
+        error: "API key not found. Generate token first.",
+      });
+    }
+
+    const apiKey = cached.apiKey;
 
     const response = await axios.get(
-      `http://localhost:45000/ws_c2_services_sale_order_status?order_no=${order_no}&apikey=${apikey}`
+      `http://localhost:45000/ws_c2_services_sale_order_status?order_no=${order_no}&apikey=${apiKey}`
     );
 
     res.json(response.data);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Order Status API failed" });
+  }
+});
+
+app.post("/api/customers", async (req, res) => {
+  try {
+    const { c2Code, storeId, prodCode } = req.body;
+
+    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
+    const cached = cache.get(cacheKey);
+
+    if (!cached) {
+      return res.status(400).json({
+        error: "API key not found. Generate token first.",
+      });
+    }
+
+    // 🔥 Inject API KEY from cache
+    const payload = {
+      ...req.body,
+      apiKey: cached.apiKey,
+    };
+
+    const response = await axios.post(
+      "YOUR_CUSTOMERS_API_URL",
+      payload
+    );
+
+    res.json(response.data);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Customers API failed" });
   }
 });
 // 🔍 Optional: Get from cache

@@ -98,7 +98,7 @@ const CreateOrder = () => {
         c2Code: "03B000",
         storeId: "001",
         prodCode: "02",
-        apiKey: "MDNCMDAwMDAxXjIwMjYtMDItMTIgMTE6NTI=",
+        
         ...form,
         materialInfo: materials,
       };

@@ -26,18 +26,14 @@ const OrderStatus = () => {
       return;
     }
 
-    const apiKey = localStorage.getItem("apiKey");
+    
 
-    if (!apiKey) {
-      alert("Generate token first");
-      return;
-    }
-
+  
     try {
       setLoading(true);
 
       const res = await axios.get(
-        `http://localhost:5000/api/order-status?order_no=${orderNo}&apikey=${apiKey}`
+        `http://localhost:5000/api/order-status?order_no=${orderNo}`
       );
 
       setData(res.data);
