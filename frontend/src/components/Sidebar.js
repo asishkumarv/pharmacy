@@ -30,7 +30,7 @@ const Sidebar = ({ active }) => {
   onClick={() => navigate("/stock")}
   sx={{ justifyContent: "flex-start", mb: 1 }}
 >
-  Stock
+  Item info
 </Button>
 
 <Button
@@ -48,7 +48,7 @@ const Sidebar = ({ active }) => {
         onClick={() => navigate("/items")}
         sx={{ justifyContent: "flex-start", mb: 1 }}
       >
-        Items
+        Stock Info
       </Button>
 
 <Button

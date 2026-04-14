@@ -51,27 +51,16 @@ app.post("/api/generate-token", async (req, res) => {
 
 app.post("/api/items", async (req, res) => {
   try {
-    const { c2Code, storeId, prodCode } = req.body;
+    const payload = req.body;
 
-    const cacheKey = `${c2Code}_${storeId}_${prodCode}`;
-    const cached = cache.get(cacheKey);
-
-    if (!cached) {
-      return res.status(400).json({
-        error: "API key not found. Generate token first.",
-      });
-    }
-
-    // 🔥 Inject API KEY from cache
-    const payload = {
-      ...req.body,
-      apiKey: cached.apiKey,
-    };
+    console.log("📌 Items API Request Payload:", payload);
 
     const response = await axios.post(
-      "YOUR_REAL_API_URL_HERE",
+      "http://117.211.64.158:41000/ws_c2_services_get_stock_data",
       payload
     );
+
+    console.log("📥 Items API Response:", response.data);
 
     res.json(response.data);
   } catch (err) {
