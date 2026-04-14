@@ -18,12 +18,13 @@ import Sidebar from "../components/Sidebar";
 const PurchaseOrder = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
-    if (!fromDate || !toDate) {
-      alert("Select dates");
+    if (!fromDate || !toDate || !apiKey) {
+      alert("Select dates and enter API Key");
       return;
     }
 
@@ -31,10 +32,10 @@ const PurchaseOrder = () => {
       setLoading(true);
 
       const payload = {
-        c2Code: "03B000",
+        c2Code: "P00000",
         storeId: "001",
         prodCode: "02",
-       
+        apiKey,
         fromDate,
         toDate,
       };
@@ -94,6 +95,16 @@ const PurchaseOrder = () => {
               />
             </Box>
 
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption">API KEY</Typography>
+              <TextField
+                type="text"
+                fullWidth
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+            </Box>
+
             <Button
               variant="contained"
               onClick={handleSearch}
@@ -116,34 +127,42 @@ const PurchaseOrder = () => {
                 </Typography>
 
                 <Typography variant="body2" mb={2}>
-                  Ref: {order.refname} | Total: ₹{order.total}
+                  <strong style={{ color: 'blue' }}>Ref:</strong> {order.refname} | <strong style={{ color: 'red' }}>Status:</strong> {order.status || 'Pending'} | Created: {order.createDateTime} | CreatedUser: {order.createUser}
                 </Typography>
-
+<Typography variant="body2" mb={2}><strong style={{ color: 'blue' }}>Remarks:</strong> {order.remarks} </Typography>
                 {/* Items Table */}
                 {order.details && (
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Item Code</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Qty</TableCell>
-                        <TableCell>Scheme</TableCell>
-                        <TableCell>Rate</TableCell>
-                      </TableRow>
-                    </TableHead>
-
-                    <TableBody>
-                      {order.details.map((item, i) => (
-                        <TableRow key={i}>
-                          <TableCell>{item.itemCode}</TableCell>
-                          <TableCell>{item.itemName}</TableCell>
-                          <TableCell>{item.Qty}</TableCell>
-                          <TableCell>{item.schemeQty}</TableCell>
-                          <TableCell>{item.rate}</TableCell>
+                  <>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Item Code</TableCell>
+                          <TableCell>Name</TableCell>
+                          <TableCell>Rate per unit</TableCell>
+                          <TableCell>Scheme Qty</TableCell>
+                          <TableCell>Qty</TableCell>
+                          
+                          
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHead>
+
+                      <TableBody>
+                        {order.details.map((item, i) => (
+                          <TableRow key={i}>
+                            <TableCell>{item.itemCode}</TableCell>
+                            <TableCell>{item.itemName}</TableCell>
+                            <TableCell>{item.rate}</TableCell>
+                            <TableCell>{item.schemeQty}</TableCell>
+                            <TableCell>{item.Qty}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+
+                    <Typography variant="h6" sx={{ textAlign: 'right', color: 'green', fontWeight: 'bold', mt: 2 }}>
+                      Total order Price: ₹{order.total}
+                    </Typography>
+                  </>
                 )}
               </CardContent>
             </Card>

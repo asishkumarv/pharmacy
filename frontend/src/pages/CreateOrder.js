@@ -18,6 +18,7 @@ import Sidebar from "../components/Sidebar";
 
 const CreateOrder = () => {
   const [form, setForm] = useState({
+    apiKey: "",
     ipNo: "",
     mobileNo: "",
     patientName: "",
@@ -28,6 +29,7 @@ const CreateOrder = () => {
     ordTime: "",
     userId: "",
     actCode: "",
+    actName: "",
     drCode: "",
     drName: "",
     drAddress: "",
@@ -43,9 +45,9 @@ const CreateOrder = () => {
     sysIp: "",
     sysUser: "",
     remark: "",
-    urgentFlag: false,
-    ordConversionFlag: false,
-    dcConversionFlag: false,
+    urgentFlag: 0,
+    ordConversionFlag: 0,
+    dcConversionFlag: 0,
   });
 
   const [materials, setMaterials] = useState([
@@ -65,14 +67,26 @@ const CreateOrder = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const calculateOrderTotal = (materialRows) => {
+    return materialRows
+      .reduce((sum, row) => {
+        const saleRate = parseFloat(row.saleRate) || 0;
+        const serviceQty = parseFloat(row.serviceQty) || 0;
+        return sum + saleRate * serviceQty;
+      }, 0)
+      .toFixed(2);
+  };
+
   const handleMaterialChange = (index, field, value) => {
     const updated = [...materials];
     updated[index][field] = value;
+    const orderTotal = calculateOrderTotal(updated);
     setMaterials(updated);
+    setForm({ ...form, orderTotal });
   };
 
   const addRow = () => {
-    setMaterials([
+    const updated = [
       ...materials,
       {
         itemSeq: materials.length + 1,
@@ -84,21 +98,24 @@ const CreateOrder = () => {
         discPer: "",
         schDiscPer: "",
       },
-    ]);
+    ];
+    setMaterials(updated);
+    setForm({ ...form, orderTotal: calculateOrderTotal(updated) });
   };
 
   const removeRow = (index) => {
     const updated = materials.filter((_, i) => i !== index);
     setMaterials(updated);
+    setForm({ ...form, orderTotal: calculateOrderTotal(updated) });
   };
 
   const handleSubmit = async () => {
     try {
       const payload = {
-        c2Code: "03B000",
+        c2Code: "P00000",
         storeId: "001",
         prodCode: "02",
-        
+        apiKey: form.apiKey,
         ...form,
         materialInfo: materials,
       };
@@ -142,6 +159,7 @@ const CreateOrder = () => {
                     fullWidth
                     label={label}
                     name={name}
+                    value={form[name]}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -149,11 +167,21 @@ const CreateOrder = () => {
 
               <Grid item xs={3}>
                 <TextField
+                  fullWidth
+                  label="Act Name"
+                  name="actName"
+                  value={form.actName}
+                  onChange={handleChange}
+                />
+              </Grid>
+
+              <Grid item xs={3}>
+                <TextField
                   type="date"
                   fullWidth
-                //   label="Order Date"
                   InputLabelProps={{ shrink: true }}
                   name="ordDate"
+                  value={form.ordDate}
                   onChange={handleChange}
                 />
               </Grid>
@@ -191,6 +219,7 @@ const CreateOrder = () => {
                     fullWidth
                     label={label}
                     name={name}
+                    value={form[name]}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -220,16 +249,29 @@ const CreateOrder = () => {
                     fullWidth
                     label={label}
                     name={name}
+                    value={form[name]}
                     onChange={handleChange}
+                    InputProps={name === "orderTotal" ? { readOnly: true } : undefined}
                   />
                 </Grid>
               ))}
+
+              <Grid item xs={3}>
+                <TextField
+                  fullWidth
+                  label="API Key"
+                  name="apiKey"
+                  value={form.apiKey}
+                  onChange={handleChange}
+                />
+              </Grid>
 
               <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Remark"
                   name="remark"
+                  value={form.remark}
                   multiline
                   rows={2}
                   onChange={handleChange}
@@ -240,6 +282,7 @@ const CreateOrder = () => {
 <FormControlLabel
   control={
     <Switch
+      checked={form.urgentFlag === 1}
       onChange={(e) =>
         setForm({
           ...form,
@@ -253,6 +296,7 @@ const CreateOrder = () => {
  <FormControlLabel
   control={
     <Switch
+      checked={form.ordConversionFlag === 1}
       onChange={(e) =>
         setForm({
           ...form,
@@ -266,6 +310,7 @@ const CreateOrder = () => {
 <FormControlLabel
   control={
     <Switch
+      checked={form.dcConversionFlag === 1}
       onChange={(e) =>
         setForm({
           ...form,
