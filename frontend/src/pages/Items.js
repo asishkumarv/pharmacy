@@ -210,7 +210,7 @@ const Items = () => {
                     <TableCell>Expiry</TableCell>
                     <TableCell>Mrp</TableCell>
                     <TableCell>MrpBox</TableCell>
-<TableCell>Sale rate</TableCell>
+                    <TableCell>Sale rate</TableCell>
                   </TableRow>
                 </TableHead>
 
