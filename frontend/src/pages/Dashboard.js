@@ -40,7 +40,7 @@ const Dashboard = () => {
   const fetchDashboard = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/dashboard");
+      const res = await axios.get("https://pharmacy-qbfr.onrender.com/api/dashboard");
       setData(res.data);
     } catch (err) {
       console.error(err);
@@ -52,7 +52,7 @@ const Dashboard = () => {
   const handleManualFetch = async () => {
     setLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/manual-fetch");
+      await axios.post("https://pharmacy-qbfr.onrender.com/api/manual-fetch");
       await fetchDashboard();
     } catch (err) {
       console.error(err);
@@ -71,7 +71,7 @@ const Dashboard = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="dashboard" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>

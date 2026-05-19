@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  TextField,
   Button,
   Typography,
   Card,
@@ -18,7 +17,7 @@ const GenerateToken = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/generate-token", {});
+      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/generate-token", {});
       const data = res.data;
       setResponse(data);
       if (data.apiKey) {
@@ -33,7 +32,7 @@ const GenerateToken = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="generate" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-main)' }}>

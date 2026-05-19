@@ -26,11 +26,16 @@ const PurchaseOrder = () => {
   const [rowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const handleFetch = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/purchase-order", {});
+      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/purchase-order", {
+        fromDate,
+        toDate
+      });
       setData(res.data.data || []);
       setLastUpdated(res.data.lastUpdated);
       setPage(0);
@@ -44,6 +49,7 @@ const PurchaseOrder = () => {
 
   useEffect(() => {
     handleFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -62,7 +68,7 @@ const PurchaseOrder = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="purchase" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
@@ -90,7 +96,7 @@ const PurchaseOrder = () => {
 
         <Card className="glass-card" sx={{ borderRadius: 4, mb: 4, overflow: 'visible' }}>
           <CardContent sx={{ p: 0 }}>
-            <Box sx={{ p: 3, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ p: 3, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <TextField
                 size="small"
                 placeholder="Search orders..."
@@ -105,6 +111,30 @@ const PurchaseOrder = () => {
                   ),
                 }}
               />
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>From Date</Typography>
+                  <TextField
+                    size="small"
+                    type="date"
+                    inputProps={{ onClick: (e) => e.target.showPicker?.() }}
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    sx={{ bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>To Date</Typography>
+                  <TextField
+                    size="small"
+                    type="date"
+                    inputProps={{ onClick: (e) => e.target.showPicker?.() }}
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    sx={{ bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                  />
+                </Box>
+              </Box>
             </Box>
 
             {loading && data.length === 0 ? (

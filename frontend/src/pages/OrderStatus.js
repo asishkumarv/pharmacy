@@ -35,7 +35,7 @@ const OrderStatus = () => {
     const orderToFetch = overrideOrderNo || orderNoInput;
     try {
       setLoading(true);
-      const url = orderToFetch ? `http://localhost:5000/api/order-status?order_no=${orderToFetch}` : `http://localhost:5000/api/order-status`;
+      const url = orderToFetch ? `https://pharmacy-qbfr.onrender.com/api/order-status?order_no=${orderToFetch}` : `https://pharmacy-qbfr.onrender.com/api/order-status`;
       const res = await axios.get(url);
       setData(res.data.data || []);
       setLastUpdated(res.data.lastUpdated);
@@ -54,6 +54,7 @@ const OrderStatus = () => {
     } else {
        handleFetch();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -72,7 +73,7 @@ const OrderStatus = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="order-status" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>

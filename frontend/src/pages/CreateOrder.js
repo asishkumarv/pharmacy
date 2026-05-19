@@ -19,6 +19,11 @@ import Sidebar from "../components/Sidebar";
 
 const CreateOrder = () => {
   const navigate = useNavigate();
+  
+  const now = new Date();
+  const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+  const localTime = now.toTimeString().split(' ')[0];
+
   const [form, setForm] = useState({
     apiKey: "",
     ipNo: "",
@@ -27,8 +32,8 @@ const CreateOrder = () => {
     patientAddress: "",
     patientEmail: "",
     counterSale: "",
-    ordDate: "",
-    ordTime: "",
+    ordDate: localDate,
+    ordTime: localTime,
     userId: "",
     actCode: "",
     actName: "",
@@ -122,7 +127,7 @@ const CreateOrder = () => {
         materialInfo: materials,
       };
 
-      const res = await axios.post("http://localhost:5000/api/create-order", payload);
+      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/create-order", payload);
       alert("Order Created");
       
       // Attempt to extract order ID from response or use the one from form
@@ -137,7 +142,7 @@ const CreateOrder = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="create" />
 
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
@@ -162,7 +167,7 @@ const CreateOrder = () => {
                 ["userId", "User ID"],
                 ["actCode", "Act Code"],
               ].map(([name, label]) => (
-                <Grid item xs={3} key={name}>
+                <Grid item xs={12} sm={6} md={3} key={name}>
                   <TextField
                     fullWidth
                     label={label}
@@ -173,7 +178,7 @@ const CreateOrder = () => {
                 </Grid>
               ))}
 
-              <Grid item xs={3}>
+              <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   fullWidth
                   label="Act Name"
@@ -183,24 +188,26 @@ const CreateOrder = () => {
                 />
               </Grid>
 
-              <Grid item xs={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>Order Date</Typography>
                 <TextField
                   type="date"
                   fullWidth
-                  InputLabelProps={{ shrink: true }}
+                  inputProps={{ onClick: (e) => e.target.showPicker?.() }}
                   name="ordDate"
                   value={form.ordDate}
                   onChange={handleChange}
                 />
               </Grid>
 
-              <Grid item xs={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>Order Time</Typography>
                 <TextField
                   type="time"
                   fullWidth
-                 // label="Order Time"
-                  InputLabelProps={{ shrink: true }}
+                  inputProps={{ step: 1, onClick: (e) => e.target.showPicker?.() }}
                   name="ordTime"
+                  value={form.ordTime}
                   onChange={handleChange}
                 />
               </Grid>
@@ -222,7 +229,7 @@ const CreateOrder = () => {
                 ["drOfficeCode", "Dr Office Code"],
                 ["dmanCode", "DMAN Code"],
               ].map(([name, label]) => (
-                <Grid item xs={3} key={name}>
+                <Grid item xs={12} sm={6} md={3} key={name}>
                   <TextField
                     fullWidth
                     label={label}
@@ -252,7 +259,7 @@ const CreateOrder = () => {
                 ["sysIp", "Sys IP"],
                 ["sysUser", "Sys User"],
               ].map(([name, label]) => (
-                <Grid item xs={3} key={name}>
+                <Grid item xs={12} sm={6} md={3} key={name}>
                   <TextField
                     fullWidth
                     label={label}
@@ -264,7 +271,7 @@ const CreateOrder = () => {
                 </Grid>
               ))}
 
-              <Grid item xs={3}>
+              <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   fullWidth
                   label="API Key"
@@ -340,9 +347,9 @@ const CreateOrder = () => {
             <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 2 }}>Material Information</Typography>
 
             {materials.map((row, index) => (
-              <Grid container spacing={2} key={index} mt={1}>
+              <Grid container spacing={2} key={index} mt={1} alignItems="center">
                 {Object.keys(row).map((field) => (
-                  <Grid item xs={1.5} key={field}>
+                  <Grid item xs={12} sm={6} md={1.3} key={field}>
                     <TextField
                       fullWidth
                       label={field}
@@ -358,8 +365,8 @@ const CreateOrder = () => {
                   </Grid>
                 ))}
 
-                <Grid item xs={1}>
-                  <IconButton onClick={() => removeRow(index)}>
+                <Grid item xs={12} md={1} sx={{ display: 'flex', justifyContent: { xs: 'flex-end', md: 'center' } }}>
+                  <IconButton onClick={() => removeRow(index)} color="error">
                     <DeleteIcon />
                   </IconButton>
                 </Grid>

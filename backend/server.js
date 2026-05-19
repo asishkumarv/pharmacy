@@ -194,7 +194,20 @@ app.post("/api/create-order", async (req, res) => {
     }
 });
 
-app.post("/api/items", async (req, res) => { res.json({ data: db.items, lastUpdated: lastUpdated.items }); });
+app.post("/api/items", async (req, res) => {
+    try {
+        const { inputDateTime } = req.body;
+        if (inputDateTime) {
+            const token = cache.get("default_token") || (await fetchToken()).apiKey;
+            const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "inputDateTime": inputDateTime, "apiKey": token };
+            const apiRes = await axios.post("http://117.211.64.158:41000/ws_c2_services_get_master_data", payload, {timeout: 10000});
+            return res.json({ data: apiRes.data.data || [], lastUpdated: new Date().toISOString() });
+        }
+        res.json({ data: db.items, lastUpdated: lastUpdated.items });
+    } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.post("/api/stock", async (req, res) => {
     try {
@@ -227,7 +240,20 @@ app.post("/api/customers", async (req, res) => {
     }
 });
 
-app.post("/api/purchase-order", async (req, res) => { res.json({ data: db.po, lastUpdated: lastUpdated.po }); });
+app.post("/api/purchase-order", async (req, res) => {
+    try {
+        const { fromDate, toDate } = req.body;
+        if (fromDate && toDate) {
+            const token = cache.get("default_token") || (await fetchToken()).apiKey;
+            const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "apiKey": token, "fromDate": fromDate, "toDate": toDate };
+            const apiRes = await axios.post("http://117.211.64.158:41000/ws_c2_services_po_fetch", payload, {timeout: 10000});
+            return res.json({ data: apiRes.data.details ? [apiRes.data] : [], lastUpdated: new Date().toISOString() });
+        }
+        res.json({ data: db.po, lastUpdated: lastUpdated.po });
+    } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.get("/api/order-status", async (req, res) => {
     try {

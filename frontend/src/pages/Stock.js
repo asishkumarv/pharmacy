@@ -6,7 +6,6 @@ import {
   CardContent,
   TextField,
   Button,
-  Grid,
   Table,
   TableHead,
   TableRow,
@@ -33,7 +32,7 @@ const Stock = () => {
     try {
       setLoading(true);
       const itemCodes = itemCodesInput ? itemCodesInput.split(",").map(c => c.trim()) : [];
-      const res = await axios.post("http://localhost:5000/api/stock", { itemCodes });
+      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/stock", { itemCodes });
       setData(res.data.data || []);
       setLastUpdated(res.data.lastUpdated);
       setPage(0);
@@ -47,6 +46,7 @@ const Stock = () => {
 
   useEffect(() => {
     handleFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -65,7 +65,7 @@ const Stock = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="stock" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>

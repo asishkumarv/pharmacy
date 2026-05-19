@@ -32,7 +32,7 @@ const Customers = () => {
   const handleFetch = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/customers", {
+      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/customers", {
         fromDate,
         toDate
       });
@@ -49,6 +49,7 @@ const Customers = () => {
 
   useEffect(() => {
     handleFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -67,7 +68,7 @@ const Customers = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="customers" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
@@ -111,24 +112,28 @@ const Customers = () => {
                 }}
               />
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <TextField
-                  size="small"
-                  type="date"
-                  label="From Date"
-                  InputLabelProps={{ shrink: true }}
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
-                />
-                <TextField
-                  size="small"
-                  type="date"
-                  label="To Date"
-                  InputLabelProps={{ shrink: true }}
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
-                />
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>From Date</Typography>
+                  <TextField
+                    size="small"
+                    type="date"
+                    inputProps={{ onClick: (e) => e.target.showPicker?.() }}
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    sx={{ bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>To Date</Typography>
+                  <TextField
+                    size="small"
+                    type="date"
+                    inputProps={{ onClick: (e) => e.target.showPicker?.() }}
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    sx={{ bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                  />
+                </Box>
               </Box>
             </Box>
 

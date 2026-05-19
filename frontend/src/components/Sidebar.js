@@ -1,6 +1,7 @@
-import React from "react";
-import { Box, Typography, Button, Divider } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography, Button, Divider, IconButton, Drawer, useTheme, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -11,6 +12,9 @@ import VpnKeyIcon from '@mui/icons-material/VpnKey';
 
 const Sidebar = ({ active }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
@@ -23,20 +27,8 @@ const Sidebar = ({ active }) => {
     { id: 'generate', label: 'Generate Token', path: '/generatetoken', icon: <VpnKeyIcon /> },
   ];
 
-  return (
-    <Box
-      sx={{
-        width: 260,
-        height: "100vh",
-        background: "var(--card-bg)",
-        backdropFilter: "blur(12px)",
-        borderRight: "1px solid var(--border-color)",
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: '4px 0 24px rgba(0,0,0,0.02)'
-      }}
-    >
+  const sidebarContent = (
+    <Box sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box sx={{ width: 40, height: 40, borderRadius: 2, background: 'linear-gradient(135deg, #4F46E5, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: 20 }}>
           P
@@ -54,7 +46,10 @@ const Sidebar = ({ active }) => {
             key={item.id}
             fullWidth
             variant={active === item.id ? "contained" : "text"}
-            onClick={() => navigate(item.path)}
+            onClick={() => {
+              navigate(item.path);
+              setDrawerOpen(false);
+            }}
             startIcon={item.icon}
             className="animated-button"
             sx={{
@@ -77,6 +72,73 @@ const Sidebar = ({ active }) => {
           </Button>
         ))}
       </Box>
+    </Box>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <Box
+          sx={{
+            width: "100%",
+            height: 60,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 2,
+            background: "var(--card-bg)",
+            backdropFilter: "blur(12px)",
+            borderBottom: "1px solid var(--border-color)",
+            position: "sticky",
+            top: 0,
+            zIndex: 1100,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 32, height: 32, borderRadius: 1.5, background: 'linear-gradient(135deg, #4F46E5, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+              P
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: "var(--text-main)", letterSpacing: '-0.5px' }}>
+              Pharm<span className="gradient-text">ERP</span>
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setDrawerOpen(true)} color="primary">
+            <MenuIcon />
+          </IconButton>
+        </Box>
+        <Drawer
+          anchor="left"
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          PaperProps={{
+            sx: {
+              width: 260,
+              background: "var(--card-bg)",
+              backdropFilter: "blur(12px)",
+            }
+          }}
+        >
+          {sidebarContent}
+        </Drawer>
+      </>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        width: 260,
+        height: "100vh",
+        background: "var(--card-bg)",
+        backdropFilter: "blur(12px)",
+        borderRight: "1px solid var(--border-color)",
+        position: "sticky",
+        top: 0,
+        flexShrink: 0,
+        boxShadow: '4px 0 24px rgba(0,0,0,0.02)'
+      }}
+    >
+      {sidebarContent}
     </Box>
   );
 };

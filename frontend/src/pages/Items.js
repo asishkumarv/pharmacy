@@ -6,7 +6,6 @@ import {
   CardContent,
   TextField,
   Button,
-  Grid,
   Table,
   TableHead,
   TableRow,
@@ -27,11 +26,18 @@ const Items = () => {
   const [rowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [inputDateTime, setInputDateTime] = useState("");
 
   const handleFetch = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/items", {});
+      // Ensure the datetime is formatted as "YYYY-MM-DD HH:mm:ss" if provided
+      let formattedDate = inputDateTime;
+      if (inputDateTime) {
+        formattedDate = inputDateTime.replace("T", " ");
+        if (formattedDate.length === 16) formattedDate += ":00";
+      }
+      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/items", { inputDateTime: formattedDate });
       setData(res.data.data || []);
       setLastUpdated(res.data.lastUpdated);
       setPage(0);
@@ -45,6 +51,7 @@ const Items = () => {
 
   useEffect(() => {
     handleFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -63,7 +70,7 @@ const Items = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="items" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
@@ -91,7 +98,7 @@ const Items = () => {
 
         <Card className="glass-card" sx={{ borderRadius: 4, mb: 4, overflow: 'visible' }}>
           <CardContent sx={{ p: 0 }}>
-            <Box sx={{ p: 3, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ p: 3, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <TextField
                 size="small"
                 placeholder="Search items by code, name..."
@@ -106,6 +113,19 @@ const Items = () => {
                   ),
                 }}
               />
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>Input Date/Time</Typography>
+                  <TextField
+                    size="small"
+                    type="datetime-local"
+                    inputProps={{ onClick: (e) => e.target.showPicker?.() }}
+                    value={inputDateTime}
+                    onChange={(e) => setInputDateTime(e.target.value)}
+                    sx={{ bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                  />
+                </Box>
+              </Box>
             </Box>
 
             {loading && data.length === 0 ? (
