@@ -27,12 +27,18 @@ const Stock = () => {
   const [search, setSearch] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
   const [itemCodesInput, setItemCodesInput] = useState("");
+  const [inputDateTime, setInputDateTime] = useState("");
 
   const handleFetch = async () => {
     try {
       setLoading(true);
       const itemCodes = itemCodesInput ? itemCodesInput.split(",").map(c => c.trim()) : [];
-      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/stock", { itemCodes });
+      let formattedDate = inputDateTime;
+      if (inputDateTime) {
+        formattedDate = inputDateTime.replace("T", " ");
+        if (formattedDate.length === 16) formattedDate += ":00";
+      }
+      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/stock", { itemCodes, inputDateTime: formattedDate });
       setData(res.data.data || []);
       setLastUpdated(res.data.lastUpdated);
       setPage(0);
@@ -108,14 +114,28 @@ const Stock = () => {
                   ),
                 }}
               />
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <TextField
-                  size="small"
-                  label="Item Codes (comma sep)"
-                  value={itemCodesInput}
-                  onChange={(e) => setItemCodesInput(e.target.value)}
-                  sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
-                />
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>Item Codes (comma sep)</Typography>
+                  <TextField
+                    size="small"
+                    placeholder="e.g. 711291, 254229"
+                    value={itemCodesInput}
+                    onChange={(e) => setItemCodesInput(e.target.value)}
+                    sx={{ bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500, pl: 1 }}>Input Date/Time</Typography>
+                  <TextField
+                    size="small"
+                    type="datetime-local"
+                    inputProps={{ onClick: (e) => e.target.showPicker?.() }}
+                    value={inputDateTime}
+                    onChange={(e) => setInputDateTime(e.target.value)}
+                    sx={{ bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                  />
+                </Box>
               </Box>
             </Box>
 

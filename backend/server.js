@@ -211,10 +211,26 @@ app.post("/api/items", async (req, res) => {
 
 app.post("/api/stock", async (req, res) => {
     try {
-        const { itemCodes } = req.body;
-        if (itemCodes && itemCodes.length > 0) {
+        const { itemCodes, inputDateTime } = req.body;
+        if ((itemCodes && itemCodes.length > 0) || inputDateTime) {
             const token = cache.get("default_token") || (await fetchToken()).apiKey;
-            const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "itemCodes": itemCodes, "apiKey": token };
+            const payload = { 
+                "c2Code": "P00000", 
+                "storeId": "001", 
+                "prodCode": "02", 
+                "apiKey": token 
+            };
+            
+            if (inputDateTime) {
+                payload.inputDateTime = inputDateTime;
+            }
+            
+            if (itemCodes && itemCodes.length > 0) {
+                payload.itemCodes = itemCodes;
+            } else {
+                payload.itemCodes = [""];
+            }
+
             const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
             return res.json({ data: apiRes.data.data || [], lastUpdated: new Date().toISOString() });
         }
