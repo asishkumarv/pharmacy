@@ -57,7 +57,7 @@ setTimeout(autoFetchAll, 2000);
 async function fetchToken() {
     try {
         const payload = { "c2Code": "03C000", "storeId": "001", "prodCode": "02", "securityKey": "TUVVek1EQXhNalE9" };
-        const res = await axios.post("http://117.211.64.158:41000/ws_c2_services_generate_token", payload, {timeout: 10000});
+        const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_generate_token", payload, {timeout: 10000});
         cache.set("default_token", res.data.apiKey);
         return res.data;
     } catch(err) {
@@ -69,7 +69,7 @@ async function fetchToken() {
 async function fetchMasterData(apiKey) {
     try {
         const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "inputDateTime": new Date().toISOString().slice(0, 19).replace("T", " "), "apiKey": apiKey };
-        const res = await axios.post("http://117.211.64.158:41000/ws_c2_services_get_master_data", payload, {timeout: 10000});
+        const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_master_data", payload, {timeout: 10000});
         if (res.data && res.data.data) {
             db.items = res.data.data;
             lastUpdated.items = new Date().toISOString();
@@ -82,7 +82,7 @@ async function fetchMasterData(apiKey) {
 async function fetchStockData(apiKey) {
     try {
         const payload = { "c2Code": "03B000", "storeId": "001", "prodCode": "02", "itemCodes": ["711291","254229"], "apiKey": apiKey };
-        const res = await axios.post("http://117.211.64.158:41000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
+        const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
         if (res.data && res.data.data) {
             db.stock = res.data.data;
             lastUpdated.stock = new Date().toISOString();
@@ -95,7 +95,7 @@ async function fetchStockData(apiKey) {
 async function fetchCustomersData(apiKey) {
     try {
         const payload = { "c2Code": "03B000", "storeId": "001", "prodCode": "02", "apiKey": apiKey, "fromDate": "2025-06-12", "toDate": "2025-06-12" };
-        const res = await axios.post("http://117.211.64.158:41000/ws_c2_services_fetch_local_customer", payload, {timeout: 10000});
+        const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_fetch_local_customer", payload, {timeout: 10000});
         if (res.data && Array.isArray(res.data)) {
             db.customers = res.data;
             lastUpdated.customers = new Date().toISOString();
@@ -111,7 +111,7 @@ async function fetchCustomersData(apiKey) {
 async function fetchPOData(apiKey) {
     try {
         const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "apiKey": apiKey, "fromDate": "2025-06-12", "toDate": "2025-06-12" };
-        const res = await axios.post("http://117.211.64.158:41000/ws_c2_services_po_fetch", payload, {timeout: 10000});
+        const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_po_fetch", payload, {timeout: 10000});
         if (res.data && res.data.details) {
             db.po = [res.data];
             lastUpdated.po = new Date().toISOString();
@@ -124,7 +124,7 @@ async function fetchPOData(apiKey) {
 async function fetchOrderStatusData(apiKey, orderNo) {
     if (!orderNo) return; // Cannot fetch status without an order number
     try {
-        const res = await axios.get(`http://117.211.64.158:41000/ws_c2_services_sale_order_status?order_no=${orderNo}&apikey=${apiKey}`, {timeout: 10000});
+        const res = await axios.get(`http://117.211.64.158:21000/ws_c2_services_sale_order_status?order_no=${orderNo}&apikey=${apiKey}`, {timeout: 10000});
         if (res.data && res.data.invoices) {
             db.orderStatus = [res.data];
             lastUpdated.orderStatus = new Date().toISOString();
@@ -179,7 +179,7 @@ app.post("/api/create-order", async (req, res) => {
         const payload = req.body;
         const token = cache.get("default_token") || (await fetchToken()).apiKey;
         payload.apiKey = token;
-        const apiRes = await axios.post("http://117.211.64.158:41000/ws_c2_services_create_sale_order", payload, {timeout: 10000});
+        const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_create_sale_order", payload, {timeout: 10000});
         
         // Track this order number for background dashboard fetching
         const orderNoToTrack = apiRes.data?.orderId || payload.orderId;
@@ -200,7 +200,7 @@ app.post("/api/items", async (req, res) => {
         if (inputDateTime) {
             const token = cache.get("default_token") || (await fetchToken()).apiKey;
             const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "inputDateTime": inputDateTime, "apiKey": token };
-            const apiRes = await axios.post("http://117.211.64.158:41000/ws_c2_services_get_master_data", payload, {timeout: 10000});
+            const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_master_data", payload, {timeout: 10000});
             return res.json({ data: apiRes.data.data || [], lastUpdated: new Date().toISOString() });
         }
         res.json({ data: db.items, lastUpdated: lastUpdated.items });
@@ -215,7 +215,7 @@ app.post("/api/stock", async (req, res) => {
         if (itemCodes && itemCodes.length > 0) {
             const token = cache.get("default_token") || (await fetchToken()).apiKey;
             const payload = { "c2Code": "03B000", "storeId": "001", "prodCode": "02", "itemCodes": itemCodes, "apiKey": token };
-            const apiRes = await axios.post("http://117.211.64.158:41000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
+            const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
             return res.json({ data: apiRes.data.data || [], lastUpdated: new Date().toISOString() });
         }
         res.json({ data: db.stock, lastUpdated: lastUpdated.stock });
@@ -230,7 +230,7 @@ app.post("/api/customers", async (req, res) => {
         if (fromDate && toDate) {
             const token = cache.get("default_token") || (await fetchToken()).apiKey;
             const payload = { "c2Code": "03B000", "storeId": "001", "prodCode": "02", "apiKey": token, "fromDate": fromDate, "toDate": toDate };
-            const apiRes = await axios.post("http://117.211.64.158:41000/ws_c2_services_fetch_local_customer", payload, {timeout: 10000});
+            const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_fetch_local_customer", payload, {timeout: 10000});
             let parsedData = Array.isArray(apiRes.data) ? apiRes.data : (apiRes.data.data || []);
             return res.json({ data: parsedData, lastUpdated: new Date().toISOString() });
         }
@@ -246,7 +246,7 @@ app.post("/api/purchase-order", async (req, res) => {
         if (fromDate && toDate) {
             const token = cache.get("default_token") || (await fetchToken()).apiKey;
             const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "apiKey": token, "fromDate": fromDate, "toDate": toDate };
-            const apiRes = await axios.post("http://117.211.64.158:41000/ws_c2_services_po_fetch", payload, {timeout: 10000});
+            const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_po_fetch", payload, {timeout: 10000});
             return res.json({ data: apiRes.data.details ? [apiRes.data] : [], lastUpdated: new Date().toISOString() });
         }
         res.json({ data: db.po, lastUpdated: lastUpdated.po });
@@ -260,7 +260,7 @@ app.get("/api/order-status", async (req, res) => {
         const { order_no } = req.query;
         if (order_no) {
              const token = cache.get("default_token") || (await fetchToken()).apiKey;
-             const apiRes = await axios.get(`http://117.211.64.158:41000/ws_c2_services_sale_order_status?order_no=${order_no}&apikey=${token}`, {timeout: 10000});
+             const apiRes = await axios.get(`http://117.211.64.158:21000/ws_c2_services_sale_order_status?order_no=${order_no}&apikey=${token}`, {timeout: 10000});
              return res.json({ data: apiRes.data.invoices ? [apiRes.data] : [], lastUpdated: new Date().toISOString() });
         }
         res.json({ data: db.orderStatus, lastUpdated: lastUpdated.orderStatus });
