@@ -29,6 +29,13 @@ let lastUpdated = {
 
 let latestOrderNo = null; // Track the most recently created order for dashboard stats
 
+const getLocalDateString = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 // Auto fetch every 3 hours (10800000 ms)
 setInterval(() => {
     console.log("⏰ Running scheduled auto-fetch every 3 hours...");
@@ -81,7 +88,14 @@ async function fetchMasterData(apiKey) {
 
 async function fetchStockData(apiKey) {
     try {
-        const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "itemCodes": ["711291","254229"], "apiKey": apiKey };
+        const payload = { 
+            "c2Code": "P00000", 
+            "storeId": "001", 
+            "prodCode": "02", 
+            "inputDateTime": new Date().toISOString().slice(0, 19).replace("T", " "),
+            "itemCodes": ["711291","254229"], 
+            "apiKey": apiKey 
+        };
         const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
         if (res.data && res.data.data) {
             db.stock = res.data.data;
@@ -94,7 +108,19 @@ async function fetchStockData(apiKey) {
 
 async function fetchCustomersData(apiKey) {
     try {
-        const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "apiKey": apiKey, "fromDate": "2025-06-12", "toDate": "2025-06-12" };
+        const todayStr = getLocalDateString(new Date());
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const oneWeekAgoStr = getLocalDateString(oneWeekAgo);
+
+        const payload = { 
+            "c2Code": "P00000", 
+            "storeId": "001", 
+            "prodCode": "02", 
+            "apiKey": apiKey, 
+            "fromDate": oneWeekAgoStr, 
+            "toDate": todayStr 
+        };
         const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_fetch_local_customer", payload, {timeout: 10000});
         if (res.data && Array.isArray(res.data)) {
             db.customers = res.data;
@@ -110,7 +136,19 @@ async function fetchCustomersData(apiKey) {
 
 async function fetchPOData(apiKey) {
     try {
-        const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "apiKey": apiKey, "fromDate": "2025-06-12", "toDate": "2025-06-12" };
+        const todayStr = getLocalDateString(new Date());
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const oneWeekAgoStr = getLocalDateString(oneWeekAgo);
+
+        const payload = { 
+            "c2Code": "P00000", 
+            "storeId": "001", 
+            "prodCode": "02", 
+            "apiKey": apiKey, 
+            "fromDate": oneWeekAgoStr, 
+            "toDate": todayStr 
+        };
         const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_po_fetch", payload, {timeout: 10000});
         if (res.data && res.data.details) {
             db.po = [res.data];
@@ -138,16 +176,18 @@ app.get("/api/dashboard", (req, res) => {
     const calcStats = (arr, dateField) => {
         if(!arr || arr.length === 0) return { today: 0, week: 0, total: 0 };
         const today = new Date();
+        const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
         let todayCount = 0;
         let weekCount = 0;
         arr.forEach(item => {
-            const d = new Date(item[dateField] || new Date());
+            if (!item[dateField]) return;
+            const d = new Date(item[dateField]);
+            if (isNaN(d.getTime())) return;
+            
             if (d.toDateString() === today.toDateString()) todayCount++;
-            const diffTime = Math.abs(today - d);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            if(diffDays <= 7) weekCount++;
+            if (d >= oneWeekAgo && d <= today) weekCount++;
         });
-        return { today: todayCount || arr.length, week: weekCount || arr.length, total: arr.length };
+        return { today: todayCount, week: weekCount, total: arr.length };
     };
 
     res.json({
@@ -218,18 +258,10 @@ app.post("/api/stock", async (req, res) => {
                 "c2Code": "P00000", 
                 "storeId": "001", 
                 "prodCode": "02", 
+                "inputDateTime": inputDateTime || "",
+                "itemCodes": (itemCodes && itemCodes.length > 0) ? itemCodes : [""],
                 "apiKey": token 
             };
-            
-            if (inputDateTime) {
-                payload.inputDateTime = inputDateTime;
-            }
-            
-            if (itemCodes && itemCodes.length > 0) {
-                payload.itemCodes = itemCodes;
-            } else {
-                payload.itemCodes = [""];
-            }
 
             const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
             return res.json({ data: apiRes.data.data || [], lastUpdated: new Date().toISOString() });
