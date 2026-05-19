@@ -75,7 +75,10 @@ async function fetchToken() {
 
 async function fetchMasterData(apiKey) {
     try {
-        const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "inputDateTime": new Date().toISOString().slice(0, 19).replace("T", " "), "apiKey": apiKey };
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        const oneWeekAgoStr = d.toISOString().slice(0, 19).replace("T", " ");
+        const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "inputDateTime": oneWeekAgoStr, "apiKey": apiKey };
         const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_master_data", payload, {timeout: 10000});
         if (res.data && res.data.data) {
             db.items = res.data.data;
@@ -93,7 +96,7 @@ async function fetchStockData(apiKey) {
             "storeId": "001", 
             "prodCode": "02", 
             "inputDateTime": new Date().toISOString().slice(0, 19).replace("T", " "),
-            "itemCodes": ["711291","254229"], 
+            "itemCodes": [""], 
             "apiKey": apiKey 
         };
         const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
