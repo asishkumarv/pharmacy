@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -13,51 +13,27 @@ import {
   TableCell,
   TableBody,
   TablePagination,
+  InputAdornment,
+  CircularProgress
 } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 
 const Items = () => {
-  const [apiKey, setApiKey] = useState("");
-  const [itemCodes, setItemCodes] = useState("");
-  const [inputDateTime, setInputDateTime] = useState("");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
-  const [rowsPerPage] = useState(100);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [rowsPerPage] = useState(10);
+  const [search, setSearch] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const handleFetch = async () => {
-    if (!apiKey) {
-      alert("Enter API Key");
-      return;
-    }
-
     try {
       setLoading(true);
-
-      const formattedDateTime = inputDateTime ? `${inputDateTime.replace("T", " ")}:00` : "";
-      const payload = {
-        c2Code: "P00000",
-        storeId: "001",
-        prodCode: "02",
-        inputDateTime: formattedDateTime,
-        itemCodes: itemCodes ? itemCodes.split(",").map((i) => i.trim()) : [],
-        apiKey,
-      };
-
-      console.log("Stock request payload:", payload);
-
-      const res = await axios.post(
-        "http://localhost:5000/api/items",
-        payload
-      );
-
-      const responseData = res.data.data || [];
-      setData(responseData);
-      setTotalRecords(responseData.length);
+      const res = await axios.post("http://localhost:5000/api/items", {});
+      setData(res.data.data || []);
+      setLastUpdated(res.data.lastUpdated);
       setPage(0);
     } catch (err) {
       console.error(err);
@@ -67,181 +43,118 @@ const Items = () => {
     }
   };
 
-
+  useEffect(() => {
+    handleFetch();
+  }, []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
+  const filteredData = data.filter(item => 
+    Object.values(item).some(val => 
+      String(val).toLowerCase().includes(search.toLowerCase())
+    )
+  );
 
-  const sortedData = [...data].sort((a, b) => {
-    if (!sortField) return 0;
-
-    if (sortField === "expiryDate") {
-      const aDate = new Date(a.expiryDate);
-      const bDate = new Date(b.expiryDate);
-      return sortOrder === "asc" ? aDate - bDate : bDate - aDate;
-    }
-
-    if (sortField === "stockBalQty") {
-      const aValue = Number(a.stockBalQty) || 0;
-      const bValue = Number(b.stockBalQty) || 0;
-      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
-    }
-
-    return 0;
-  });
-
-  const displayedData = sortedData.slice(
+  const displayedData = filteredData.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
-      {/* Sidebar */}
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="items" />
-
-      {/* Main Content */}
-      <Box sx={{ flex: 1, p: 4, background: "#f1f5f9", minHeight: "100vh" }}>
-        <Typography variant="h4" mb={1}>
-          Stock Information
-        </Typography>
-
-        <Typography variant="body2" color="text.secondary" mb={3}>
-          View stock details with pagination
-        </Typography>
-
-        {/* Search Card */}
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Typography variant="caption" sx={{ fontWeight: 600 }}>
-              API KEY & ITEM CODES
+      <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-main)' }}>
+              Item Master Data
             </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+              Browse and manage items synced from the backend. 
+              {lastUpdated && ` Last sync: ${new Date(lastUpdated).toLocaleString()}`}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Button
+              variant="contained"
+              onClick={handleFetch}
+              disabled={loading}
+              className="animated-button"
+              sx={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', textTransform: 'none', px: 3, py: 1, borderRadius: 2 }}
+            >
+              {loading ? "Syncing..." : "Manual Sync"}
+            </Button>
+          </Box>
+        </Box>
 
-            <Grid container spacing={2} mt={1}>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  placeholder="Enter API Key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+        <Card className="glass-card" sx={{ borderRadius: 4, mb: 4, overflow: 'visible' }}>
+          <CardContent sx={{ p: 0 }}>
+            <Box sx={{ p: 3, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <TextField
+                size="small"
+                placeholder="Search items by code, name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                sx={{ width: 300, bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+
+            {loading && data.length === 0 ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table>
+                  <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>Item Code</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Item Name</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>HSN/SAC</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Qty/Box</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Updated Date</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {displayedData.length > 0 ? displayedData.map((item, index) => (
+                      <TableRow key={index} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                        <TableCell sx={{ fontWeight: 500, color: 'var(--primary)' }}>{item.itemCode || '-'}</TableCell>
+                        <TableCell>{item.itemName || '-'}</TableCell>
+                        <TableCell>{item.categoryName || item.categoryCode || '-'}</TableCell>
+                        <TableCell>{item.hsnSacCode || '-'}</TableCell>
+                        <TableCell>{item.itemQtyPerBox || '-'}</TableCell>
+                        <TableCell>{item.itemUpdatedDate ? new Date(item.itemUpdatedDate).toLocaleDateString() : '-'}</TableCell>
+                      </TableRow>
+                    )) : (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 3, color: 'text.secondary' }}>No items found</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  component="div"
+                  count={filteredData.length}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={rowsPerPage}
+                  rowsPerPageOptions={[10]}
+                  sx={{ borderTop: '1px solid var(--border-color)' }}
                 />
-              </Grid>
-
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  placeholder="Enter Item Codes (comma separated) - optional"
-                  value={itemCodes}
-                  onChange={(e) => setItemCodes(e.target.value)}
-                />
-              </Grid>
-
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  type="datetime-local"
-                  // label="Input Date Time (optional)"
-                  InputLabelProps={{ shrink: true }}
-                  value={inputDateTime}
-                  onChange={(e) => setInputDateTime(e.target.value || "")}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{ height: "100%", background: "#2563eb" }}
-                  onClick={handleFetch}
-                  disabled={loading}
-                >
-                  {loading ? "Fetching..." : "Fetch Data"}
-                </Button>
-              </Grid>
-            </Grid>
+              </Box>
+            )}
           </CardContent>
         </Card>
-
-        {/* Results Table */}
-        {data.length > 0 && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" mb={2}>
-                Stock Data
-              </Typography>
-
-              <Grid container spacing={2} mb={2}>
-                <Grid item>
-                  <Button
-                    variant={sortField === "expiryDate" ? "contained" : "outlined"}
-                    onClick={() => handleSort("expiryDate")}
-                  >
-                    Expiry Date {sortField === "expiryDate" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <Button
-                    variant={sortField === "stockBalQty" ? "contained" : "outlined"}
-                    onClick={() => handleSort("stockBalQty")}
-                  >
-                    Stock Qty {sortField === "stockBalQty" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                  </Button>
-                </Grid>
-              </Grid>
-
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Item Code</TableCell>
-                    <TableCell>Item Name</TableCell>
-                    <TableCell>Batch No</TableCell>
-                    <TableCell>Qty/Box</TableCell>
-                    <TableCell>Stock Qty</TableCell>
-                    <TableCell>Expiry</TableCell>
-                    <TableCell>Mrp</TableCell>
-                    <TableCell>MrpBox</TableCell>
-                    <TableCell>Sale rate</TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {displayedData.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.c_item_code}</TableCell>
-                      <TableCell>{item.itemName}</TableCell>
-                      <TableCell>{item.batchNo}</TableCell>
-                      <TableCell>{item.itemQtyPerBox}</TableCell>
-                      <TableCell>{item.stockBalQty}</TableCell>
-                      <TableCell>{item.expiryDate}</TableCell>
-                      <TableCell>{item.mrp}</TableCell>
-                      <TableCell>{item.mrpbox}</TableCell>
-                      <TableCell>{item.saleRate}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              <TablePagination
-                component="div"
-                count={totalRecords}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                rowsPerPageOptions={[100]}
-              />
-            </CardContent>
-          </Card>
-        )}
       </Box>
     </Box>
   );

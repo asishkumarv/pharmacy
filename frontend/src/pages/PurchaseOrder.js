@@ -1,56 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
-  TextField,
-  Button,
   Typography,
   Card,
   CardContent,
+  TextField,
+  Button,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
+  TablePagination,
+  InputAdornment,
+  CircularProgress
 } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 
 const PurchaseOrder = () => {
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const [apiKey, setApiKey] = useState("");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage] = useState(10);
+  const [search, setSearch] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const handleSearch = async () => {
-    if (!fromDate || !toDate || !apiKey) {
-      alert("Select dates and enter API Key");
-      return;
-    }
-
+  const handleFetch = async () => {
     try {
       setLoading(true);
-
-      const payload = {
-        c2Code: "P00000",
-        storeId: "001",
-        prodCode: "02",
-        apiKey,
-        fromDate,
-        toDate,
-      };
-
-      const res = await axios.post(
-        "http://localhost:5000/api/purchase-order",
-        payload
-      );
-
-      // API may return array OR concatenated objects → normalize
-      const responseData = Array.isArray(res.data)
-        ? res.data
-        : [res.data];
-
-      setData(responseData);
+      const res = await axios.post("http://localhost:5000/api/purchase-order", {});
+      setData(res.data.data || []);
+      setLastUpdated(res.data.lastUpdated);
+      setPage(0);
     } catch (err) {
       console.error(err);
       alert("API Error");
@@ -59,114 +42,116 @@ const PurchaseOrder = () => {
     }
   };
 
+  useEffect(() => {
+    handleFetch();
+  }, []);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const filteredData = data.filter(item => 
+    Object.values(item).some(val => 
+      String(val).toLowerCase().includes(search.toLowerCase())
+    )
+  );
+
+  const displayedData = filteredData.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="purchase" />
-
-      <Box sx={{ flex: 1, p: 4, background: "#f1f5f9", minHeight: "100vh" }}>
-        <Typography variant="h4" mb={1}>
-          Purchase Order
-        </Typography>
-
-        <Typography variant="body2" color="text.secondary" mb={3}>
-          View purchase orders between specific dates
-        </Typography>
-
-        {/* Filter */}
-        <Card sx={{ p: 2, mb: 3 }}>
-          <CardContent sx={{ display: "flex", gap: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="caption">FROM DATE</Typography>
-              <TextField
-                type="date"
-                fullWidth
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-              />
-            </Box>
-
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="caption">TO DATE</Typography>
-              <TextField
-                type="date"
-                fullWidth
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-              />
-            </Box>
-
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="caption">API KEY</Typography>
-              <TextField
-                type="text"
-                fullWidth
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
-            </Box>
-
+      <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-main)' }}>
+              Purchase Orders
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+              Track purchase orders and details.
+              {lastUpdated && ` Last sync: ${new Date(lastUpdated).toLocaleString()}`}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Button
               variant="contained"
-              onClick={handleSearch}
+              onClick={handleFetch}
               disabled={loading}
-              sx={{ mt: 2, height: 40, background: "#2563eb" }}
+              className="animated-button"
+              sx={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', textTransform: 'none', px: 3, py: 1, borderRadius: 2 }}
             >
-              {loading ? "Searching..." : "Search"}
+              {loading ? "Syncing..." : "Manual Sync"}
             </Button>
+          </Box>
+        </Box>
+
+        <Card className="glass-card" sx={{ borderRadius: 4, mb: 4, overflow: 'visible' }}>
+          <CardContent sx={{ p: 0 }}>
+            <Box sx={{ p: 3, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <TextField
+                size="small"
+                placeholder="Search orders..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                sx={{ width: 300, bgcolor: 'white', borderRadius: 2, '& fieldset': { border: 'none' }, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+
+            {loading && data.length === 0 ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table>
+                  <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>Branch</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Reference</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Total Value</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Created Date</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Items Count</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {displayedData.length > 0 ? displayedData.map((item, index) => (
+                      <TableRow key={index} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                        <TableCell sx={{ fontWeight: 500 }}>{item.br_code || '-'}</TableCell>
+                        <TableCell>{item.refname || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: 'success.main' }}>₹{item.total || '0.00'}</TableCell>
+                        <TableCell>{item.createDateTime ? new Date(item.createDateTime).toLocaleDateString() : '-'}</TableCell>
+                        <TableCell>{item.details ? item.details.length : 0}</TableCell>
+                      </TableRow>
+                    )) : (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>No orders found</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  component="div"
+                  count={filteredData.length}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={rowsPerPage}
+                  rowsPerPageOptions={[10]}
+                  sx={{ borderTop: '1px solid var(--border-color)' }}
+                />
+              </Box>
+            )}
           </CardContent>
         </Card>
-
-        {/* Results */}
-        {data.length > 0 &&
-          data.map((order, index) => (
-            <Card key={index} sx={{ mb: 3 }}>
-              <CardContent>
-                {/* Order Info */}
-                <Typography variant="h6" mb={1}>
-                  {order.prefix}-{order.srno} | {order.custname}
-                </Typography>
-
-                <Typography variant="body2" mb={2}>
-                  <strong style={{ color: 'blue' }}>Ref:</strong> {order.refname} | <strong style={{ color: 'red' }}>Status:</strong> {order.status || 'Pending'} | Created: {order.createDateTime} | CreatedUser: {order.createUser}
-                </Typography>
-<Typography variant="body2" mb={2}><strong style={{ color: 'blue' }}>Remarks:</strong> {order.remarks} </Typography>
-                {/* Items Table */}
-                {order.details && (
-                  <>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Item Code</TableCell>
-                          <TableCell>Name</TableCell>
-                          <TableCell>Rate per unit</TableCell>
-                          <TableCell>Scheme Qty</TableCell>
-                          <TableCell>Qty</TableCell>
-                          
-                          
-                        </TableRow>
-                      </TableHead>
-
-                      <TableBody>
-                        {order.details.map((item, i) => (
-                          <TableRow key={i}>
-                            <TableCell>{item.itemCode}</TableCell>
-                            <TableCell>{item.itemName}</TableCell>
-                            <TableCell>{item.rate}</TableCell>
-                            <TableCell>{item.schemeQty}</TableCell>
-                            <TableCell>{item.Qty}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-
-                    <Typography variant="h6" sx={{ textAlign: 'right', color: 'green', fontWeight: 'bold', mt: 2 }}>
-                      Total order Price: ₹{order.total}
-                    </Typography>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          ))}
       </Box>
     </Box>
   );

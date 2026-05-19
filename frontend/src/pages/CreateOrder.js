@@ -14,9 +14,11 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 
 const CreateOrder = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     apiKey: "",
     ipNo: "",
@@ -112,7 +114,7 @@ const CreateOrder = () => {
   const handleSubmit = async () => {
     try {
       const payload = {
-        c2Code: "P00000",
+        c2Code: "03B000",
         storeId: "001",
         prodCode: "02",
         apiKey: form.apiKey,
@@ -120,8 +122,14 @@ const CreateOrder = () => {
         materialInfo: materials,
       };
 
-      await axios.post("http://localhost:5000/api/create-order", payload);
+      const res = await axios.post("http://localhost:5000/api/create-order", payload);
       alert("Order Created");
+      
+      // Attempt to extract order ID from response or use the one from form
+      const orderNoToTrack = res.data?.orderId || form.orderId;
+      if (orderNoToTrack) {
+        navigate(`/order-status?order_no=${orderNoToTrack}`);
+      }
     } catch (err) {
       console.error(err);
       alert("API Error");
@@ -129,19 +137,19 @@ const CreateOrder = () => {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="create" />
 
-      <Box sx={{ flex: 1, p: 4, background: "#f1f5f9" }}>
-        <Typography variant="h4">Create Order</Typography>
-        <Typography mb={3}>
+      <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-main)' }}>Create Order</Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 1, mb: 4 }}>
           Fill in patient, doctor, and material details
         </Typography>
 
         {/* Patient Info */}
-        <Card sx={{ mb: 3 }}>
+        <Card className="glass-card" sx={{ mb: 4, borderRadius: 4 }}>
           <CardContent>
-            <Typography variant="h6">Patient Information</Typography>
+            <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 2 }}>Patient Information</Typography>
 
             <Grid container spacing={2} mt={1}>
               {[
@@ -201,9 +209,9 @@ const CreateOrder = () => {
         </Card>
 
         {/* Doctor Info */}
-        <Card sx={{ mb: 3 }}>
+        <Card className="glass-card" sx={{ mb: 4, borderRadius: 4 }}>
           <CardContent>
-            <Typography variant="h6">Doctor Information</Typography>
+            <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 2 }}>Doctor Information</Typography>
 
             <Grid container spacing={2} mt={1}>
               {[
@@ -229,9 +237,9 @@ const CreateOrder = () => {
         </Card>
 
         {/* Order Details */}
-        <Card sx={{ mb: 3 }}>
+        <Card className="glass-card" sx={{ mb: 4, borderRadius: 4 }}>
           <CardContent>
-            <Typography variant="h6">Order Details</Typography>
+            <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 2 }}>Order Details</Typography>
 
             <Grid container spacing={2} mt={1}>
               {[
@@ -327,9 +335,9 @@ const CreateOrder = () => {
         </Card>
 
         {/* Material Info */}
-        <Card>
+        <Card className="glass-card" sx={{ mb: 4, borderRadius: 4 }}>
           <CardContent>
-            <Typography variant="h6">Material Information</Typography>
+            <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 2 }}>Material Information</Typography>
 
             {materials.map((row, index) => (
               <Grid container spacing={2} key={index} mt={1}>
@@ -370,7 +378,8 @@ const CreateOrder = () => {
 
         <Button
           variant="contained"
-          sx={{ mt: 3 }}
+          className="animated-button"
+          sx={{ mt: 2, background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', px: 4, py: 1.5, borderRadius: 3, textTransform: 'none', fontSize: '1.1rem' }}
           onClick={handleSubmit}
         >
           Submit Order

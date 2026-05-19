@@ -6,42 +6,24 @@ import {
   Typography,
   Card,
   CardContent,
+  CircularProgress
 } from "@mui/material";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 
 const GenerateToken = () => {
-  const [form, setForm] = useState({
-    c2Code: "",
-    storeId: "",
-    prodCode: "",
-    securityKey: "",
-  });
-
-  const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [response, setResponse] = useState(null);
 
   const handleSubmit = async () => {
-    const { c2Code, storeId, prodCode, securityKey } = form;
-
-    if (!c2Code || !storeId || !prodCode || !securityKey) {
-      alert("All fields are required");
-      return;
-    }
-
     try {
       setLoading(true);
-
-      const res = await axios.post(
-        "http://localhost:5000/api/generate-token",
-        form
-      );
-
-      setResponse(res.data);
+      const res = await axios.post("http://localhost:5000/api/generate-token", {});
+      const data = res.data;
+      setResponse(data);
+      if (data.apiKey) {
+        localStorage.setItem("authData", JSON.stringify({ apiKey: data.apiKey }));
+      }
     } catch (err) {
       console.error(err);
       alert("API Error");
@@ -51,71 +33,40 @@ const GenerateToken = () => {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      {/* Sidebar */}
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
       <Sidebar active="generate" />
-      {/* Main Content */}
-      <Box sx={{ flex: 1, p: 4, background: "#f1f5f9", minHeight: "100vh" }}>
-        <Typography variant="h4" mb={1}>
+      <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-main)' }}>
           Generate Token
         </Typography>
-
-        <Typography variant="body2" color="text.secondary" mb={3}>
-          Generate authentication token using credentials
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 1, mb: 4 }}>
+          Generate and sync authentication token automatically from the backend.
         </Typography>
 
-        <Card sx={{ width: 420, p: 2 }}>
+        <Card className="glass-card" sx={{ width: 420, p: 2, borderRadius: 4 }}>
           <CardContent>
-            <Typography variant="subtitle1" mb={2}>
-              🔑 Token Generator
+            <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 3 }}>
+              🔑 Automatic Token Generator
             </Typography>
-
-            <TextField
-              fullWidth
-              label="C2 Code"
-              name="c2Code"
-              margin="normal"
-              onChange={handleChange}
-            />
-
-            <TextField
-              fullWidth
-              label="Store ID"
-              name="storeId"
-              margin="normal"
-              onChange={handleChange}
-            />
-
-            <TextField
-              fullWidth
-              label="Product Code"
-              name="prodCode"
-              margin="normal"
-              onChange={handleChange}
-            />
-
-            <TextField
-              fullWidth
-              label="Security Key"
-              name="securityKey"
-              margin="normal"
-              onChange={handleChange}
-            />
 
             <Button
               fullWidth
               variant="contained"
-              sx={{ mt: 2, background: "#2563eb" }}
+              className="animated-button"
+              sx={{ py: 1.5, background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', textTransform: 'none', fontSize: '1rem', borderRadius: 2 }}
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "Generating..." : "Generate Token"}
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Generate New Token"}
             </Button>
 
             {response && (
-              <Box mt={3}>
-                <Typography variant="body2">
-                  <strong>API Key:</strong> {response.apiKey}
+              <Box mt={4} p={2} sx={{ bgcolor: 'rgba(16, 185, 129, 0.1)', borderRadius: 2, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                <Typography variant="body2" sx={{ color: 'var(--success)', fontWeight: 600, mb: 1 }}>
+                  Success! Token Generated:
+                </Typography>
+                <Typography variant="body2" sx={{ wordBreak: 'break-all', fontFamily: 'monospace' }}>
+                  {response.apiKey}
                 </Typography>
               </Box>
             )}
