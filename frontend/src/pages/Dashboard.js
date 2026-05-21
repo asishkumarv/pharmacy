@@ -130,31 +130,6 @@ const Dashboard = () => {
                 <DashboardCard title="🛒 Purchase Orders" stats={data?.po?.stats} lastUpdated={data?.po?.lastUpdated} />
               </Grid>
             )}
-            {filterCards("Sales Orders") && (
-              <Grid item xs={12} md={6} lg={4}>
-                <DashboardCard title="🧾 Sales Orders" stats={data?.orderStatus?.stats} lastUpdated={data?.orderStatus?.lastUpdated} />
-              </Grid>
-            )}
-            {filterCards("Webhooks (Received)") && (
-              <Grid item xs={12} md={6} lg={4}>
-                <DashboardCard title="⚡ Webhooks (Received)" stats={data?.webhooks?.stats} lastUpdated={data?.webhooks?.lastUpdated} />
-              </Grid>
-            )}
-            
-            {/* Revenue Widget for Webhooks */}
-            {filterCards("Webhooks Revenue") && (
-              <Grid item xs={12}>
-                <Card className="glass-card" sx={{ borderRadius: 4, background: 'linear-gradient(135deg, var(--primary) 0%, #06B6D4 100%)', color: 'white' }}>
-                  <CardContent sx={{ p: 4 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>Total Webhook Revenue</Typography>
-                    <Typography variant="body1" sx={{ opacity: 0.9, mb: 3 }}>Based on today's received sales orders and invoices</Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                      ₹ {data?.webhooks?.stats?.total ? (1500.5 + 2340).toLocaleString() : '0'}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            )}
           </Grid>
         )}
       </Box>

@@ -96,7 +96,7 @@ async function fetchStockData(apiKey) {
             "storeId": "001", 
             "prodCode": "02", 
             "inputDateTime": new Date().toISOString().slice(0, 19).replace("T", " "),
-            "itemCodes": [""], 
+            "itemCodes": [], 
             "apiKey": apiKey 
         };
         const res = await axios.post("http://117.211.64.158:21000/ws_c2_services_get_stock_data", payload, {timeout: 10000});
@@ -262,7 +262,7 @@ app.post("/api/stock", async (req, res) => {
                 "storeId": "001", 
                 "prodCode": "02", 
                 "inputDateTime": inputDateTime || "",
-                "itemCodes": (itemCodes && itemCodes.length > 0) ? itemCodes : [""],
+                "itemCodes": (itemCodes && itemCodes.length > 0) ? itemCodes : [],
                 "apiKey": token 
             };
 
