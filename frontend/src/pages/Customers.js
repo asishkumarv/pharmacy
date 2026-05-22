@@ -18,6 +18,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import API_BASE from "../config";
 
 const Customers = () => {
   const [data, setData] = useState([]);
@@ -32,7 +33,7 @@ const Customers = () => {
   const handleFetch = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/customers", {
+      const res = await axios.post(`${API_BASE}/api/customers`, {
         fromDate,
         toDate
       });

@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import API_BASE from "../config";
 
 const GenerateToken = () => {
   const [loading, setLoading] = useState(false);
@@ -17,7 +18,7 @@ const GenerateToken = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/generate-token", {});
+      const res = await axios.post(`${API_BASE}/api/generate-token`, {});
       const data = res.data;
       setResponse(data);
       if (data.apiKey) {

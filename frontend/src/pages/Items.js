@@ -18,6 +18,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import API_BASE from "../config";
 
 const Items = () => {
   const [data, setData] = useState([]);
@@ -37,7 +38,7 @@ const Items = () => {
         formattedDate = inputDateTime.replace("T", " ");
         if (formattedDate.length === 16) formattedDate += ":00";
       }
-      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/items", { inputDateTime: formattedDate });
+      const res = await axios.post(`${API_BASE}/api/items`, { inputDateTime: formattedDate });
       setData(res.data.data || []);
       setLastUpdated(res.data.lastUpdated);
       setPage(0);

@@ -502,7 +502,7 @@ app.post("/api/purchase-order", async (req, res) => {
         if (fromDate && toDate) {
             const token = cache.get("default_token") || (await fetchToken()).apiKey;
             const payload = { "c2Code": "P00000", "storeId": "001", "prodCode": "02", "apiKey": token, "fromDate": fromDate, "toDate": toDate };
-            const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_po_fetch", payload, {responseType: 'text', timeout: 10000});
+            const apiRes = await axios.post("http://117.211.64.158:21000/ws_c2_services_po_fetch", payload, {responseType: 'text', timeout: 30000});
             const parsedList = parseConcatenatedJson(apiRes.data);
             return res.json({ data: parsedList, lastUpdated: new Date().toISOString() });
         }

@@ -19,6 +19,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import API_BASE from "../config";
 
 const OrderStatus = () => {
   const [data, setData] = useState([]);
@@ -35,7 +36,7 @@ const OrderStatus = () => {
     const orderToFetch = overrideOrderNo || orderNoInput;
     try {
       setLoading(true);
-      const url = orderToFetch ? `https://pharmacy-qbfr.onrender.com/api/order-status?order_no=${orderToFetch}` : `https://pharmacy-qbfr.onrender.com/api/order-status`;
+      const url = orderToFetch ? `${API_BASE}/api/order-status?order_no=${orderToFetch}` : `${API_BASE}/api/order-status`;
       const res = await axios.get(url);
       setData(res.data.data || []);
       setLastUpdated(res.data.lastUpdated);

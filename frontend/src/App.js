@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from "axios";
+import API_BASE from "./config";
 
 import Dashboard from "./pages/Dashboard";
 import GenerateToken from "./pages/GenerateToken";
@@ -15,7 +16,7 @@ function App() {
   useEffect(() => {
     const fetchAndSetToken = async () => {
       try {
-        const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/generate-token", {});
+        const res = await axios.post(`${API_BASE}/api/generate-token`, {});
         if (res.data && res.data.apiKey) {
           localStorage.setItem("authData", JSON.stringify({ apiKey: res.data.apiKey }));
         }

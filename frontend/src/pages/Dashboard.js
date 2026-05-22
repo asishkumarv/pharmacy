@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import SyncIcon from '@mui/icons-material/Sync';
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import API_BASE from "../config";
 
 const DashboardCard = ({ title, stats, lastUpdated }) => (
   <Card className="glass-card" sx={{ height: '100%', borderRadius: 4, display: 'flex', flexDirection: 'column' }}>
@@ -42,7 +43,7 @@ const Dashboard = () => {
   const fetchDashboard = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://pharmacy-qbfr.onrender.com/api/dashboard");
+      const res = await axios.get(`${API_BASE}/api/dashboard`);
       setData(res.data);
     } catch (err) {
       console.error(err);
@@ -54,7 +55,7 @@ const Dashboard = () => {
   const handleManualFetch = async () => {
     setLoading(true);
     try {
-      await axios.post("https://pharmacy-qbfr.onrender.com/api/manual-fetch");
+      await axios.post(`${API_BASE}/api/manual-fetch`);
       await fetchDashboard();
     } catch (err) {
       console.error(err);

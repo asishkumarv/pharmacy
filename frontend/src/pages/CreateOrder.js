@@ -16,6 +16,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import API_BASE from "../config";
 
 const CreateOrder = () => {
   const navigate = useNavigate();
@@ -127,7 +128,7 @@ const CreateOrder = () => {
         materialInfo: materials,
       };
 
-      const res = await axios.post("https://pharmacy-qbfr.onrender.com/api/create-order", payload);
+      const res = await axios.post(`${API_BASE}/api/create-order`, payload);
       alert("Order Created");
       
       // Attempt to extract order ID from response or use the one from form
