@@ -6,25 +6,27 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 
 const DashboardCard = ({ title, stats, lastUpdated }) => (
-  <Card className="glass-card" sx={{ height: '100%', borderRadius: 4 }}>
-    <CardContent>
-      <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 2 }}>{title}</Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={4}>
-          <Typography variant="body2" color="text.secondary">Today</Typography>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>{stats?.today || 0}</Typography>
+  <Card className="glass-card" sx={{ height: '100%', borderRadius: 4, display: 'flex', flexDirection: 'column' }}>
+    <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <Box>
+        <Typography variant="h6" className="gradient-text" sx={{ fontWeight: 600, mb: 2, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>{title}</Typography>
+        <Grid container spacing={1}>
+          <Grid item xs={4}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.85rem' }, whiteSpace: 'nowrap' }}>Today</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.1rem', sm: '1.4rem' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>{stats?.today || 0}</Typography>
+          </Grid>
+          <Grid item xs={4}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.85rem' }, whiteSpace: 'nowrap' }}>This Week</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.1rem', sm: '1.4rem' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>{stats?.week || 0}</Typography>
+          </Grid>
+          <Grid item xs={4}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.85rem' }, whiteSpace: 'nowrap' }}>Total</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--primary)', fontSize: { xs: '1.1rem', sm: '1.4rem' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>{stats?.total || 0}</Typography>
+          </Grid>
         </Grid>
-        <Grid item xs={4}>
-          <Typography variant="body2" color="text.secondary">This Week</Typography>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>{stats?.week || 0}</Typography>
-        </Grid>
-        <Grid item xs={4}>
-          <Typography variant="body2" color="text.secondary">Total</Typography>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--primary)' }}>{stats?.total || 0}</Typography>
-        </Grid>
-      </Grid>
+      </Box>
       <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
           Last updated: {lastUpdated ? new Date(lastUpdated).toLocaleString() : 'N/A'}
         </Typography>
       </Box>
