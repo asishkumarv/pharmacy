@@ -71,7 +71,7 @@ const Items = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)", maxWidth: "100vw", overflowX: "hidden" }}>
       <Sidebar active="items" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>

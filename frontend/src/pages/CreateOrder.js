@@ -143,7 +143,7 @@ const CreateOrder = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)", maxWidth: "100vw", overflowX: "hidden" }}>
       <Sidebar active="create" />
 
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>

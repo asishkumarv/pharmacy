@@ -33,7 +33,7 @@ const GenerateToken = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100vh", bgcolor: "var(--bg-color)", maxWidth: "100vw", overflowX: "hidden" }}>
       <Sidebar active="generate" />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-main)' }}>

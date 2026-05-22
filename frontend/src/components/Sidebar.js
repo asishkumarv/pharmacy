@@ -80,7 +80,8 @@ const Sidebar = ({ active }) => {
       <>
         <Box
           sx={{
-            width: "100%",
+            width: "100vw",
+            boxSizing: "border-box",
             height: 60,
             display: "flex",
             alignItems: "center",
@@ -102,8 +103,14 @@ const Sidebar = ({ active }) => {
               Pharm<span className="gradient-text">ERP</span>
             </Typography>
           </Box>
-          <IconButton onClick={() => setDrawerOpen(true)} color="primary">
-            <MenuIcon />
+          <IconButton 
+            onClick={() => setDrawerOpen(true)} 
+            sx={{ 
+              color: 'var(--primary)',
+              p: 1
+            }}
+          >
+            <MenuIcon sx={{ fontSize: '1.75rem' }} />
           </IconButton>
         </Box>
         <Drawer
