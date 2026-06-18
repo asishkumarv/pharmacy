@@ -114,12 +114,12 @@ async function fetchDashboardStats(apiKey) {
         oneWeekAgo.setHours(0, 0, 0, 0);
         const oneWeekAgoStr = getFormattedDateTime(oneWeekAgo);
 
-        const totalStr = "2010-01-01 00:00:00";
+        const totalStr = "2018-01-01 00:00:00";
 
         // Format dates for Customers & PO
         const todayYMD = getLocalDateString(today);
         const oneWeekAgoYMD = getLocalDateString(oneWeekAgo);
-        const totalYMD = "2010-01-01";
+        const totalYMD = "2018-01-01";
 
         // 1. Fetch Item Master stats
         let itemsToday = 0;
