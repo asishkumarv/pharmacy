@@ -91,6 +91,42 @@ function parseConcatenatedJson(str) {
     return results;
 }
 
+function countConcatenatedJson(str) {
+    if (!str) return 0;
+    if (typeof str !== 'string') return 0;
+    let count = 0;
+    let braceCount = 0;
+    let inString = false;
+    let escape = false;
+
+    for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+        if (escape) {
+            escape = false;
+            continue;
+        }
+        if (char === '\\') {
+            escape = true;
+            continue;
+        }
+        if (char === '"') {
+            inString = !inString;
+            continue;
+        }
+        if (!inString) {
+            if (char === '{') {
+                braceCount++;
+            } else if (char === '}') {
+                braceCount--;
+                if (braceCount === 0) {
+                    count++;
+                }
+            }
+        }
+    }
+    return count;
+}
+
 let dashboardDataCache = {
     items: { stats: { today: 0, week: 0, total: 0 }, lastUpdated: null },
     stock: { stats: { today: 0, week: 0, total: 0 }, lastUpdated: null },
@@ -114,12 +150,12 @@ async function fetchDashboardStats(apiKey) {
         oneWeekAgo.setHours(0, 0, 0, 0);
         const oneWeekAgoStr = getFormattedDateTime(oneWeekAgo);
 
-        const totalStr = "2018-01-01 00:00:00";
+        const totalStr = "2010-01-01 00:00:00";
 
         // Format dates for Customers & PO
         const todayYMD = getLocalDateString(today);
         const oneWeekAgoYMD = getLocalDateString(oneWeekAgo);
-        const totalYMD = "2018-01-01";
+        const totalYMD = "2010-01-01";
 
         // 1. Fetch Item Master stats
         let itemsToday = 0;
@@ -144,6 +180,7 @@ async function fetchDashboardStats(apiKey) {
                 "c2Code": "P00000", "storeId": "001", "prodCode": "02", "inputDateTime": totalStr, "apiKey": apiKey
             }, { timeout: 30000 });
             itemsTotal = (resTotal.data && resTotal.data.data) ? resTotal.data.data.length : 0;
+            resTotal.data = null; // Help GC
         } catch(e) { console.error("Error fetching itemsTotal stats:", e.message); }
 
         // 2. Fetch Stock Details stats
@@ -169,6 +206,7 @@ async function fetchDashboardStats(apiKey) {
                 "c2Code": "P00000", "storeId": "001", "prodCode": "02", "inputDateTime": totalStr, "itemCodes": [], "apiKey": apiKey
             }, { timeout: 45000 });
             stockTotal = (resTotal.data && resTotal.data.data) ? resTotal.data.data.length : 0;
+            resTotal.data = null; // Help GC
         } catch(e) { console.error("Error fetching stockTotal stats:", e.message); }
 
         // 3. Fetch Local Customers stats
@@ -200,6 +238,7 @@ async function fetchDashboardStats(apiKey) {
             const data = resTotal.data;
             const parsed = Array.isArray(data) ? data : (data.data || []);
             customersTotal = parsed.length;
+            resTotal.data = null; // Help GC
         } catch(e) { console.error("Error fetching customersTotal stats:", e.message); }
 
         // 4. Fetch Purchase Orders stats
@@ -224,7 +263,8 @@ async function fetchDashboardStats(apiKey) {
             const resTotal = await axios.post("http://117.211.64.158:21000/ws_c2_services_po_fetch", {
                 "c2Code": "P00000", "storeId": "001", "prodCode": "02", "apiKey": apiKey, "fromDate": totalYMD, "toDate": todayYMD
             }, { responseType: 'text', timeout: 30000 });
-            poTotal = parseConcatenatedJson(resTotal.data).length;
+            poTotal = countConcatenatedJson(resTotal.data);
+            resTotal.data = null; // Help GC
         } catch(e) { console.error("Error fetching poTotal stats:", e.message); }
 
         const timestamp = new Date().toISOString();
